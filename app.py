@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QGridLayout
 )
 
-from src.widgets import FileExplorer, FunctionSelect, ExecutionResults, StepDetails
+from src.widgets import FunctionSelect, ExecutionResults, StepDetails
 from src.functions import extract_function
 
 class MainWindow(QWidget):

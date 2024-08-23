@@ -39,11 +39,14 @@ Output:
         PASS/POSSIBLE/FAIL : the packet number
 '''
 def _check_procedure(keywords: Callable[[str], bool], _pkt : int, pcap_file : str, pkt_req : bool) -> Result:
-    # print(f"Finding {keywords}")
-
     # Reading the pcap file
-    scapy_cap = scapy.rdpcap(pcap_file)
-    print(f"{_pkt}") # DEBUG
+    try:
+        scapy_cap = scapy.rdpcap(pcap_file)
+    except Exception as e:
+        list_result.append("Unsupported File Format")
+        return
+
+    # print(f"{_pkt}") # DEBUG
 
     flag = False
     for pkt_num, packet in enumerate(scapy_cap, start=1):

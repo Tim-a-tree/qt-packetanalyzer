@@ -74,8 +74,8 @@ class FunctionSelect(QWidget):
                 get_result(selected_function, self.selected_file)
             # Simulate the execution result for the selected function
             simulated_results = [
-              self.selected_file,
-              selected_function,
+                self.selected_file,
+                selected_function,
             ]
             # Pass the simulated results to the execution results section
             self.on_execute_callback(selected_function, simulated_results)
