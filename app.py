@@ -7,6 +7,12 @@ from PyQt5.QtWidgets import (
 from src.widgets import FunctionSelect, ExecutionResults, StepDetails
 from src.functions import extract_function
 
+
+
+
+'''
+Configures Program GUI Layout
+'''
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
