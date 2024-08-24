@@ -4,10 +4,21 @@ from lxml import etree
 from typing import Callable
 
 from src.functions import find_function, xml_to_list
-from src.models import Result, ListResult
+from src.models import Result
 from src.shared_variable import list_result
 
 
+"""
+This is main function of executing packet analyzing 
+
+Input:
+    string : function_name - name of feature want to analyze
+    string : pcap_file - name of the pcap file the user wants to analyze
+
+Output:
+    This function does not print anything, since it has only the steps of the procedure of analyzing
+    If you want to see the print line, check '_check_procedure' function
+"""
 
 
 def get_result(function_name, pcap_file):
@@ -25,7 +36,7 @@ def get_result(function_name, pcap_file):
     print_in_format(values, 0, pcap_file)
 
 
-'''
+"""
 EXPLANATION NEEDS TO BE MODIFIED
 Function: Checks the pcap, for designated KEYWORDS, whether it exists in pcap file
 
@@ -37,8 +48,12 @@ Output:
     Print: PASS/POSSIBLE/FAIL status, for PASS/POSSIBLE case it shows the packet number for users' further examination
     Returns :
         PASS/POSSIBLE/FAIL : the packet number
-'''
-def _check_procedure(keywords: Callable[[str], bool], _pkt : int, pcap_file : str, pkt_req : bool) -> Result:
+"""
+
+
+def _check_procedure(
+    keywords: Callable[[str], bool], _pkt: int, pcap_file: str, pkt_req: bool
+) -> Result:
     # Reading the pcap file
     try:
         scapy_cap = scapy.rdpcap(pcap_file)
@@ -56,7 +71,6 @@ def _check_procedure(keywords: Callable[[str], bool], _pkt : int, pcap_file : st
         if flag == False:
             exists = [False for _ in range(len(keywords))]
 
-
         if scapy.Raw in packet:
             raw_data = packet[scapy.Raw].load
 
@@ -70,7 +84,7 @@ def _check_procedure(keywords: Callable[[str], bool], _pkt : int, pcap_file : st
                 result = Result("PASS", pkt_num, False, str(raw_data))
                 if pkt_req == True:
                     result.req_type = True
-                list_result.append(result) # GLOBAL VARIABLE
+                list_result.append(result)  # GLOBAL VARIABLE
                 return result
             elif any(exists):
                 if flag:
@@ -79,7 +93,9 @@ def _check_procedure(keywords: Callable[[str], bool], _pkt : int, pcap_file : st
                         if any(exists) and starting_pkt > _pkt and pkt_req == False:
                             print(f"POSSIBLE\t\t{starting_pkt}")
 
-                            result = Result("POSSIBLE", starting_pkt, False, str(raw_data))
+                            result = Result(
+                                "POSSIBLE", starting_pkt, False, str(raw_data)
+                            )
 
                             list_result.append(result)  # GLOBAL VARIABLE
                             return result
@@ -90,19 +106,13 @@ def _check_procedure(keywords: Callable[[str], bool], _pkt : int, pcap_file : st
 
     print(f"FAIL")
     result = Result("FAIL", _pkt, pkt_req, "")
-    if pkt_req == True:
+    if pkt_req is True:
         result.req_type = True
     list_result.append(result)  # GLOBAL VARIABLE
     return result
 
 
-
-
-
-
-
-
-'''
+"""
 check_all()
 Function : checking pcap file, checks all the cases those consist in 'src/data.xml' file.
 
@@ -113,17 +123,19 @@ Output : Overall pass/fail of each cases,
         Passed Cases: {cases}
         Failed Cases: {cases}
 
-'''
+"""
+
+
 def check_all(pcap_file):
     xml_file = "src/data.xml"
-    
+
     with open(xml_file) as f:
         xml_data = f.read()
 
     root = etree.fromstring(xml_data)
     xml_list = xml_to_list(root)
 
-    function_list = find_function(root, 'is_button')
+    function_list = find_function(root, "is_button")
 
     function_list = list(map(lambda function: function[0], function_list))
 
@@ -137,7 +149,7 @@ def check_all(pcap_file):
         print_in_format(values, 0, pcap_file)
 
 
-'''
+"""
 check_designated()
 Function : examine specific cases
 
@@ -147,19 +159,14 @@ Output :
     Please check print_in_format() function
 
 
-'''
+"""
+
+
 def check_designated(values):
     print_in_format(values, 0)
 
 
-
-
-
-
-
-
-
-'''
+"""
 get_values()
 Function : gets the steps/keywords for entered case
 
@@ -169,10 +176,11 @@ Input :
 
 Output :
     value - Each step with keywords : Multi dimensional List
-'''
+"""
+
 
 def get_values(input_str, keywords):
-    keys = input_str.split('.')
+    keys = input_str.split(".")
     # print(keys)
     value = keywords
     for key in keys:
@@ -185,11 +193,7 @@ def get_values(input_str, keywords):
     return value
 
 
-
-
-
-
-'''
+"""
 print_in_format()
 Function : Prints the PASS/POSSIBLE/FAIL status of each step
 
@@ -202,16 +206,17 @@ Output:
     Prints : {PASS/POSSIBLE/FAIL}/{packet number if PASS/POSSIBLE}
     Returns: if PASS/POSSIBLE - packet number that program decided to give PASS/POSSIBLE
                 FAIL - _pkt since it could not find any
-'''
-def print_in_format(data, _pkt, pcap_file, pkt_req : bool = False) -> int:
+"""
+
+
+def print_in_format(data, _pkt, pcap_file, pkt_req: bool = False) -> int:
     if isinstance(data, dict):
         for key, value in data.items():
             print(key)
-            if not (key == 'Request' or key == 'Response'):
+            if not (key == "Request" or key == "Response"):
                 list_result.append(key)
 
-            
-            if key == 'Request':
+            if key == "Request":
                 _pkt = print_in_format(value, _pkt, pcap_file, True)
             else:
                 _pkt = print_in_format(value, _pkt, pcap_file, pkt_req)
@@ -220,10 +225,10 @@ def print_in_format(data, _pkt, pcap_file, pkt_req : bool = False) -> int:
             for item in data:
                 if item is not None:
                     _pkt = print_in_format(item, _pkt, pcap_file, pkt_req)
-        else: # PASSES the keywords from here
-            '''
+        else:  # PASSES the keywords from here
+            """
             This is the place where you need to send the keywords to parsing function
-            '''
+            """
             if data is not None or len(data) > 0:
                 result = _check_procedure(data, _pkt, pcap_file, pkt_req)
                 _pkt = result.packet_number
@@ -232,23 +237,3 @@ def print_in_format(data, _pkt, pcap_file, pkt_req : bool = False) -> int:
         print(f"at else{data}")
 
     return _pkt
-
-
-'''
-get_details()
-
-Function: gets the detail of PASS/POSSIBLE/FAIL case 
-
-Input :
-    data : List - the keywords used for deciding PASS/POSSIBLE/FAIL
-    pkt_num : int - the packet number, that program judged as an occurred point 
-
-Output:
-    Printing the full data of the packet with highlighted text for the matching keywords
-    Summarization of missing keywords if there are any
-
-'''
-def get_details(self, data, pkt_num : int):
-    pass
-
-
